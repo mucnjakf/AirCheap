@@ -25,7 +25,7 @@ AirCheap is a web application for searching cheap airplane flights based on IATA
 ---
 
 ### **Tools**
-- Source Control: Azure DevOps
+- Source Control: GitHub
 - IDE: Visual Studio 2022
 - API Tester: Postman
 - RDBMS: Azure Data Studio
