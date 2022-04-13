@@ -1,0 +1,28 @@
+﻿<CascadingAuthenticationState>
+    <BlazoredToasts Position="ToastPosition.BottomRight" Timeout="3" ShowProgressBar="true"/>
+    <CascadingBlazoredModal>
+        <Router AppAssembly="@typeof(App).Assembly">
+            <Found Context="routeData">
+                <AuthorizeRouteView RouteData="@routeData">
+                    <NotAuthorized>
+                        @if (context.User.Identity!.IsAuthenticated)
+                        {
+                            <PageTitle>AirCheap - Unauthorized</PageTitle>
+                            <UnauthorizedComponent />
+                        }
+                        else
+                        {
+                            <AuthenticationComponent />
+                        }
+                    </NotAuthorized>
+                </AuthorizeRouteView>
+            </Found>
+            <NotFound>
+                <PageTitle>AirCheap - Not found</PageTitle>
+                <LayoutView Layout="@typeof(MainLayout)">
+                    <NotFoundComponent />
+                </LayoutView>
+            </NotFound>
+        </Router>
+    </CascadingBlazoredModal>
+</CascadingAuthenticationState>

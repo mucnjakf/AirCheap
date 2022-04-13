@@ -1,0 +1,186 @@
+﻿@layout MainLayout
+
+@if (ShowErrors)
+{
+    <ul class="list-group mb-4 mx-auto">
+        @foreach (string error in Errors)
+        {
+            <li class="list-group-item list-group-item-danger">@error</li>
+        }
+    </ul>
+}
+
+<div class="card text-center" style="width: 35rem;">
+    <div class="card-body">
+        @if (UserUpdateDto is null)
+        {
+            <div class="mt-3">
+                <div class="spinner-border" role="status"></div>
+                <p>Loading...</p>
+            </div>
+        }
+        else
+        {
+            <EditForm Model="UserUpdateDto" OnValidSubmit="HandleUpdateUserAsync">
+                <div class="form-floating mb-3">
+                    <InputText class="form-control" placeholder="E-Mail" @bind-Value="UserUpdateDto.Email" />
+                    <label>Email</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <InputText class="form-control" placeholder="First name" @bind-Value="UserUpdateDto.FirstName" />
+                    <label>First name</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <InputText class="form-control" placeholder="Last name" @bind-Value="UserUpdateDto.LastName" />
+                    <label>Last name</label>
+                </div>
+
+                <div class="d-flex justify-content-center">
+                    <button class="btn btn-success my-2 d-flex align-items-center justify-content-center" style="padding-right: 1.5rem; width: 100%">
+                        <RadzenIcon Icon="check" class="mx-2" /> Confirm
+                    </button>
+                </div>
+            </EditForm>
+
+            <div class="d-flex justify-content-between">
+                <button class="btn btn-primary my-2 d-flex align-items-center justify-content-center" style="padding-right: 1.5rem; width: 15rem;" @onclick="OpenUpdateUserUsernameAsync">
+                    <RadzenIcon Icon="edit_note" class="mx-2" /> Update username
+                </button>
+                <button class="btn btn-primary my-2 d-flex align-items-center justify-content-center" style="padding-right: 1.5rem; width: 15rem;" @onclick="OpenUpdateUserPasswordAsync">
+                    <RadzenIcon Icon="edit_note" class="mx-2" /> Update password
+                </button>
+            </div>
+        }
+    </div>
+    <div class="card-footer d-flex justify-content-center">
+        <button class="btn btn-danger my-2 d-flex align-items-center justify-content-center" @onclick="ModalInstance.CancelAsync" style="padding-right: 1.5rem; width: 10rem;">
+            <RadzenIcon Icon="close" class="mx-2" /> Close
+        </button>
+    </div>
+</div>
+
+@code {
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+
+    [Inject]
+    private IUserApiService UserApiService { get; set; }
+
+    [Inject]
+    private IValidator<UserUpdateDto> UserUpdateDtoValidator { get; set; }
+
+    [CascadingParameter]
+    private IModalService ModalService { get; set; }
+
+    [CascadingParameter]
+    private BlazoredModalInstance ModalInstance { get; set; }
+
+    [Parameter]
+    public string Username { get; set; }
+
+    private UserUpdateDto UserUpdateDto { get; set; }
+
+    private bool ShowErrors { get; set; }
+
+    private List<string> Errors { get; set; } = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadUserAsync();
+    }
+
+    private async Task LoadUserAsync()
+    {
+        ShowErrors = false;
+        Errors.Clear();
+
+        ResultResponseDto<UserDetails> response = await UserApiService.GetUserAsync(Username);
+
+        if (response.Success)
+        {
+            UserUpdateDto = new UserUpdateDto();
+            UserUpdateDto.Username = Username;
+            UserUpdateDto.Email = response.ObjectResult.Email;
+            UserUpdateDto.FirstName = response.ObjectResult.FirstName;
+            UserUpdateDto.LastName = response.ObjectResult.LastName;
+
+            return;
+        }
+
+        Errors.AddRange(response.Errors);
+        ShowErrors = true;
+    }
+
+    private async Task HandleUpdateUserAsync()
+    {
+        ShowErrors = false;
+        Errors.Clear();
+
+        if (FormIsValid())
+        {
+            EmptyResponseDto response = await UserApiService.UpdateUserAsync(UserUpdateDto);
+
+            if (response.Success)
+            {
+                await ModalInstance.CloseAsync();
+                return;
+            }
+
+            Errors.AddRange(response.Errors);
+            ShowErrors = true;
+        }
+    }
+
+    private bool FormIsValid()
+    {
+        ValidationResult validationResult = UserUpdateDtoValidator.Validate(UserUpdateDto);
+
+        if (validationResult.IsValid) return true;
+
+        Errors.AddRange(validationResult.Errors.Select(error => error.ErrorMessage));
+
+        ShowErrors = true;
+
+        return false;
+    }
+
+    private async Task OpenUpdateUserUsernameAsync()
+    {
+        await ModalInstance.CancelAsync();
+
+        ModalParameters parameters = new();
+        parameters.Add("Username", Username);
+
+        ModalOptions options = new() { Animation = ModalAnimation.FadeInOut(0.3) };
+
+        IModalReference modal = ModalService.Show<AccountUpdateUsernameModal>("Account update username", parameters, options);
+        ModalResult modalResult = await modal.Result;
+
+        if (!modalResult.Cancelled)
+        {
+            await UserApiService.LogoutUserAsync();
+            NavigationManager.NavigateTo("/", true);
+        }
+    }
+
+    private async Task OpenUpdateUserPasswordAsync()
+    {
+        await ModalInstance.CancelAsync();
+
+        ModalParameters parameters = new();
+        parameters.Add("Username", Username);
+
+        ModalOptions options = new() { Animation = ModalAnimation.FadeInOut(0.3) };
+
+        IModalReference modal = ModalService.Show<AccountUpdatePasswordModal>("Account update password", parameters, options);
+        ModalResult modalResult = await modal.Result;
+
+        if (!modalResult.Cancelled)
+        {
+            await UserApiService.LogoutUserAsync();
+            NavigationManager.NavigateTo("/", true);
+        }
+    }
+}
