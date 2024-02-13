@@ -1,0 +1,237 @@
+﻿@layout MainLayout
+
+<div class="mt-5 text-center mx-auto" style="width: 30rem;">
+    <img src="../images/aircheap.png" alt="AirCheap logo" />
+    <h1 class="display-6 mt-2 text-white">Welcome to AirCheap</h1>
+
+    <TabControl Margin="mt-3">
+        <TabPage Text="Login">
+            <div class="card p-3 mb-5">
+                <EditForm Model="UserAuthenticationDto" OnValidSubmit="HandleLoginAsync">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <p class="lead">
+                                <small>Please insert your account username and password.</small>
+                            </p>
+
+                            @if (ShowLoginErrors)
+                            {
+                                <ul class="list-group my-4">
+                                    @foreach (string error in LoginErrors)
+                                    {
+                                        <li class="list-group-item list-group-item-danger">@error</li>
+                                    }
+                                </ul>
+                            }
+
+                            <div class="form-floating mb-3">
+                                <InputText class="form-control" placeholder="Username" @bind-Value="UserAuthenticationDto.Username" />
+                                <label>Username</label>
+                            </div>
+                            <div class="form-floating">
+                                <InputText type="password" class="form-control" placeholder="Password" @bind-Value="UserAuthenticationDto.Password" />
+                                <label>Password</label>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-center">
+                        <div class="my-3 d-flex justify-content-center">
+                            <button type="submit" class="btn btn-primary w-50 d-flex align-items-center justify-content-center">
+                                @if (ShowSpinner)
+                                {
+                                    <div class="spinner-border" role="status" style="width: 15px; height: 15px;"></div>
+                                }
+                                else
+                                {
+                                    <RadzenIcon Icon="login" />
+                                }
+                                <span class="mx-2">Login</span>
+                            </button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </TabPage>
+        <TabPage Text="Register">
+            <div class="card p-3 mb-5">
+                <EditForm Model="UserInsertDto" OnValidSubmit="HandleRegisterAsync">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <p class="lead">
+                                <small>Please insert your account details.</small>
+                            </p>
+
+                            @if (ShowRegisterErrors)
+                            {
+                                <ul class="list-group my-4">
+                                    @foreach (string error in RegisterErrors)
+                                    {
+                                        <li class="list-group-item list-group-item-danger">@error</li>
+                                    }
+                                </ul>
+                            }
+
+                            <div class="form-floating mb-3">
+                                <InputText class="form-control" placeholder="Username" @bind-Value="UserInsertDto.Username" />
+                                <label>Username</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <InputText type="password" class="form-control" placeholder="Password" @bind-Value="UserInsertDto.Password" />
+                                <label>Password</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <InputText type="password" class="form-control" placeholder="Confirm password" @bind-Value="UserInsertDto.ConfirmPassword" />
+                                <label>Confirm password</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <InputText class="form-control" placeholder="First name" @bind-Value="UserInsertDto.FirstName" />
+                                <label>First name</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <InputText class="form-control" placeholder="Last name" @bind-Value="UserInsertDto.LastName" />
+                                <label>Last name</label>
+                            </div>
+                            <div class="form-floating">
+                                <InputText type="email" class="form-control" placeholder="E-Mail" @bind-Value="UserInsertDto.Email" />
+                                <label>E-Mail</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-center">
+                        <div class="my-3 d-flex justify-content-center">
+                            <button type="submit" class="btn btn-primary w-50 d-flex align-items-center justify-content-center">
+                                @if (ShowSpinner)
+                                {
+                                    <div class="spinner-border" role="status" style="width: 15px; height: 15px;"></div>
+                                }
+                                else
+                                {
+                                    <RadzenIcon Icon="how_to_reg" />
+                                }
+                                <span class="mx-2">Register</span>
+                            </button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </TabPage>
+    </TabControl>
+</div>
+
+
+@code {
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+
+    [Inject]
+    private IValidator<UserAuthenticationDto> UserAuthenticationDtoValidator { get; set; }
+
+    [Inject]
+    private IValidator<UserInsertDto> UserInsertDtoValidator { get; set; }
+
+    [Inject]
+    private IUserApiService UserApiService { get; set; }
+
+    private UserAuthenticationDto UserAuthenticationDto { get; } = new();
+
+    private UserInsertDto UserInsertDto { get; } = new();
+
+    private bool ShowSpinner { get; set; }
+
+    private bool ShowLoginErrors { get; set; }
+
+    private bool ShowRegisterErrors { get; set; }
+
+    private List<string> LoginErrors { get; } = new();
+
+    private List<string> RegisterErrors { get; } = new();
+
+    private async Task HandleLoginAsync()
+    {
+        ShowSpinner = true;
+        ShowLoginErrors = false;
+        LoginErrors.Clear();
+
+        if (LoginFormIsValid())
+        {
+            ResultResponseDto<UserDetails> response = await UserApiService.LoginUserAsync(UserAuthenticationDto);
+
+            if (response.Success)
+            {
+                NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+                return;
+            }
+
+            LoginErrors.AddRange(response.Errors);
+            ShowLoginErrors = true;
+        }
+
+        ShowSpinner = false;
+    }
+
+    private bool LoginFormIsValid()
+    {
+        ValidationResult validationResult = UserAuthenticationDtoValidator.Validate(UserAuthenticationDto);
+
+        if (validationResult.IsValid) return true;
+
+        LoginErrors.AddRange(validationResult.Errors.Select(error => error.ErrorMessage));
+
+        ShowLoginErrors = true;
+
+        return false;
+    }
+
+    private async Task HandleRegisterAsync()
+    {
+        ShowSpinner = true;
+        ShowRegisterErrors = false;
+        RegisterErrors.Clear();
+
+        if (RegisterFormIsValid())
+        {
+            EmptyResponseDto registerResponse = await UserApiService.InsertUserAsync(UserInsertDto);
+
+            if (registerResponse.Success)
+            {
+                ResultResponseDto<UserDetails> loginResponse = await UserApiService.LoginUserAsync(new UserAuthenticationDto
+                    {
+                        Username = UserInsertDto.Username,
+                        Password = UserInsertDto.Password
+                    });
+
+
+                if (loginResponse.Success)
+                {
+                    NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+                    return;
+                }
+
+                RegisterErrors.AddRange(loginResponse.Errors);
+                ShowRegisterErrors = true;
+                return;
+            }
+
+            RegisterErrors.AddRange(registerResponse.Errors);
+            ShowRegisterErrors = true;
+        }
+
+        ShowSpinner = false;
+    }
+
+    private bool RegisterFormIsValid()
+    {
+        ValidationResult validationResult = UserInsertDtoValidator.Validate(UserInsertDto);
+
+        if (validationResult.IsValid) return true;
+
+        RegisterErrors.AddRange(validationResult.Errors.Select(error => error.ErrorMessage));
+
+        ShowRegisterErrors = true;
+
+        return false;
+    }
+}

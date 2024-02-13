@@ -1,0 +1,30 @@
+﻿@layout MainLayout
+
+<div class="card text-center" style="width: 35rem;">
+    <div class="card-body">
+        <h4 class="mb-3">Are you sure you want to logout?</h4>
+    </div>
+    <div class="card-footer d-flex justify-content-between px-5">
+        <button class="btn btn-danger my-2 d-flex align-items-center justify-content-center" @onclick="HandleLogoutAsync" style="padding-right: 1.5rem; width: 10rem;">
+            <RadzenIcon Icon="logout" class="mx-2" /> Logout
+        </button>
+
+        <button class="btn btn-primary my-2 d-flex align-items-center justify-content-center" @onclick="ModalInstance.CancelAsync" style="padding-right: 1.5rem; width: 10rem;">
+            <RadzenIcon Icon="close" class="mx-2" /> Cancel
+        </button>
+    </div>
+</div>
+
+@code {
+    [Inject]
+    private IUserApiService UserApiService { get; set; }
+
+    [CascadingParameter]
+    private BlazoredModalInstance ModalInstance { get; set; }
+
+    private async Task HandleLogoutAsync()
+    {
+        await UserApiService.LogoutUserAsync();
+        await ModalInstance.CloseAsync();
+    }
+}
