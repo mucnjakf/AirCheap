@@ -1,15 +1,15 @@
-# AirCheap
+# <img src="aircheap.png" width="25"/> AirCheap
 
+### **👁️ Overview**
 Airplane Flight Search Web Application - 2022.
 
----
+<p align="justify">
+  AirCheap is an web application tailored for travelers seeking affordable airfare options. With AirCheap, users can easily search for budget-friendly airplane flights by specifying the IATA codes for their origin and destination.
+</p>
 
-### **Overview**
-AirCheap is an web application tailored for travelers seeking affordable airfare options. With AirCheap, users can easily search for budget-friendly airplane flights by specifying the IATA codes for their origin and destination.
+#
 
----
-
-### **Tech Stack**
+### **⚙️ Tech Stack**
 - Frontend
   - .NET 6 - ASP.NET Core Blazor WebAssembly
   - Blazored - Local Storage | Modal | Toast
@@ -23,12 +23,10 @@ AirCheap is an web application tailored for travelers seeking affordable airfare
 - Database
   - Microsoft SQL Server
 
----
+#
 
-### **Tools**
+### **🛠️ Tools**
 - Source Control: GitHub
 - IDE: Visual Studio 2022
 - API Client: Postman
 - RDBMS: Azure Data Studio
-
----
