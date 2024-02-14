@@ -5,29 +5,30 @@ Airplane Flight Search Web Application - 2022.
 ---
 
 ### **Overview**
-AirCheap is a web application for searching cheap airplane flights based on IATA code origin and destination.
+AirCheap is an web application tailored for travelers seeking affordable airfare options. With AirCheap, users can easily search for budget-friendly airplane flights by specifying the IATA codes for their origin and destination.
 
 ---
 
 ### **Tech Stack**
-- .NET 6 - ASP.NET Core Blazor WebAssembly
-- .NET 6 - ASP.NET Core Web API
-- ASP.NET Core Identity
-- Entity Framework Core
-- Amadeus .NET SDK
-- AutoMapper
-- Fluent Validation
-- Blazored Local Storage, Modal, Toast
-- Radzen Blazor
-- Bootstrap 4
-- Microsoft SQL Server
+- Frontend
+  - .NET 6 - ASP.NET Core Blazor WebAssembly
+  - Blazored - Local Storage | Modal | Toast
+  - Radzen Blazor
+  - Bootstrap 4
+- Backend
+  - .NET 6 - ASP.NET Core Web API
+  - ASP.NET Core Identity
+  - Entity Framework Core
+  - Amadeus SDK
+- Database
+  - Microsoft SQL Server
 
 ---
 
 ### **Tools**
-- Source Control: JetBrains Space
+- Source Control: GitHub
 - IDE: Visual Studio 2022
-- API Tester: Postman
+- API Client: Postman
 - RDBMS: Azure Data Studio
 
 ---
