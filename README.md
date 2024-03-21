@@ -1,4 +1,4 @@
-# <img src="aircheap.png" width="25"/> AirCheap
+# <img src="aircheap.svg" width="25"/> AirCheap
 
 ### **👁️ Overview**
 Airplane Flight Search Web Application - 2022.
